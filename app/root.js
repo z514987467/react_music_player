@@ -3,14 +3,14 @@
  */
 import React from 'react'
 import Header from './components/header'
-import Progress from './components/progress'
+import Player from './page/player'
+import {MUSIC_LIST} from './config/music'
 
-let duration = null;
 class Root extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
-            progress: '-'
+            currentMusicItem: MUSIC_LIST[0]
         }
     }
 
@@ -24,34 +24,23 @@ class Root extends React.Component {
             supplied: 'mp3',
             wmode: 'window'
         });
-        $("#player").on($.jPlayer.event.timeupdate, (e) => {
-            duration = e.jPlayer.status.duration;
-            this.setState({
-                progress: e.jPlayer.status.currentPercentAbsolute
-            })
-        })
     }
 
     componentWillUnMount() {
-        $("#player").off($.jPlayer.event.timeupdate);
-    }
 
-    progressChangeHandler(progress) {
-        $("#player").jPlayer('play', (duration * progress));
     }
 
     render() {
         return (
             <div>
                 <Header></Header>
-                <Progress
-                    progress={this.state.progress}
-                    onProgressChange={this.progressChangeHandler}
-                    barColor = 'red'
-                ></Progress>
+                <Player
+                    currentMusicItem={this.state.currentMusicItem}
+                ></Player>
             </div>
         );
     }
+
 }
 
 export default Root;
