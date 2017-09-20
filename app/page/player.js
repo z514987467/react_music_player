@@ -27,7 +27,7 @@ class Player extends React.Component {
         $("#player").off($.jPlayer.event.timeupdate);
     }
 
-    progressChangeHandler(progress) {
+    changeProgressHandler(progress) {
         $("#player").jPlayer('play', (duration * progress));
     }
 
@@ -38,7 +38,7 @@ class Player extends React.Component {
                 <div className="mt20 row">
                     <div className="controll-wrapper">
                         <h2 className="music-title">{this.props.currentMusicItem.title}</h2>
-                        <h3 className="music-artist mt10">歌手</h3>
+                        <h3 className="music-artist mt10">{this.props.currentMusicItem.artist}</h3>
                         <div className="row mt20">
                             <div className="left-time -col-auto">-2:00</div>
                             <div className="volume-container">
@@ -67,12 +67,12 @@ class Player extends React.Component {
                                 <i className="icon next ml20" onClick={this.next}></i>
                             </div>
                             <div className="-col-auto">
-                                <i className={`icon repeat-${this.props.repeatType}`} onClick={this.changeRepeat}></i>
+                                <i className={`icon repeat-cycle`} onClick={this.changeRepeat}></i>
                             </div>
                         </div>
-                        <div className="-col-auto cover">
-                            <img />
-                        </div>
+                    </div>
+                    <div className="-col-auto cover">
+                        <img src={this.props.currentMusicItem.cover} alt={this.props.currentMusicItem.title}/>
                     </div>
                 </div>
             </div>
