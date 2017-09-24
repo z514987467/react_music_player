@@ -17,8 +17,10 @@
       width: 180px;
       height: 180px;
       border-radius: 50%;
+      animation: rotating 15s linear infinite;
     }
   }
+
   .volume-container {
     position: relative;
     left: 20px;
@@ -61,5 +63,21 @@
   .volume-wrapper {
     width: 60px;
     display: inline-block;
+  }
+}
+
+.running{
+  animation-play-state: running;
+}
+.paused{
+  animation-play-state: paused;
+}
+
+@keyframes rotating {
+  0% {
+    transform:rotate(0deg);
+  }
+  100% {
+    transform:rotate(360deg);
   }
 }

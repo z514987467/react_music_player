@@ -2,45 +2,95 @@
  * Created by zhangmz on 2017/9/16.
  */
 import React from 'react'
+import {render} from 'react-dom'
 import Header from './components/header'
 import Player from './page/player'
-import {MUSIC_LIST} from './config/music'
+import MusicList from './page/musiclist'
+import {MUSIC_LIST} from './config/musiclist'
+import {Router, IndexRoute, Link, Route, hashHistory} from 'react-router'
+import Pubsub from 'pubsub-js'
 
-class Root extends React.Component {
+class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            musicList: MUSIC_LIST,
             currentMusicItem: MUSIC_LIST[0]
         }
     }
 
+    playMusic(musicItem) {
+        $("#player").jPlayer('setMedia', {
+            mp3: musicItem.file
+        }).jPlayer('play');
+        this.setState({
+            currentMusicItem: musicItem
+        })
+    }
+
+    playNext(type = 'next') {
+        let index = this.findMusicIndex(this.state.currentMusicItem);
+        let newIndex = null;
+        let musicItemLength = this.state.musicList.length;
+        if (type === 'next') {
+            newIndex = (index + 1) % musicItemLength;
+        } else {
+            newIndex = (index - 1 + musicItemLength) % musicItemLength;
+        }
+        this.playMusic(this.state.musicList[newIndex]);
+    }
+
+    findMusicIndex(musicItem) {
+        return this.state.musicList.indexOf(musicItem);
+    }
+
     componentDidMount() {
         $("#player").jPlayer({
-            ready: function () {
-                $(this).jPlayer('setMedia', {
-                    mp3: 'http://oj4t8z2d5.bkt.clouddn.com/%E9%AD%94%E9%AC%BC%E4%B8%AD%E7%9A%84%E5%A4%A9%E4%BD%BF.mp3'
-                }).jPlayer('play')
-            },
             supplied: 'mp3',
             wmode: 'window'
         });
+        this.playMusic(this.state.currentMusicItem);
+        $('#player').on($.jPlayer.event.ended, (e) => {
+            this.playNext();
+        });
+        Pubsub.subscribe('PLAY_MUSIC', (msg, musicItem) => {
+            this.playMusic(musicItem);
+        });
+        Pubsub.subscribe('DELETE_MUSIC', (msg, musicItem) => {
+            this.setState({
+                musicList: this.state.musicList.filter((item) => {
+                    return item != musicItem;
+                })
+            });
+        })
     }
 
     componentWillUnMount() {
-
+        Pubsub.unsubscribe('PLAY_MUSIC');
+        Pubsub.unsubscribe('DELETE_MUSIC');
     }
 
     render() {
         return (
             <div>
                 <Header></Header>
-                <Player
-                    currentMusicItem={this.state.currentMusicItem}
-                ></Player>
+                {React.cloneElement(this.props.children, this.state)}
             </div>
         );
     }
+}
 
+class Root extends React.Component {
+    render() {
+        return (
+            <Router history={hashHistory}>
+                <Route path="/" component={App}>
+                    <IndexRoute component={Player}></IndexRoute>
+                    <Route path="list" component={MusicList}></Route>
+                </Route>
+            </Router>
+        );
+    }
 }
 
 export default Root;
